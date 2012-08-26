@@ -11,8 +11,8 @@ import processing.core.PImage;
 
 @SuppressWarnings("serial")
 public class DWTTest extends PApplet {
-	
-	int threshold = 7, depth = 1;
+
+	int threshold = 5, depth = 1;
 	Transform t = new Transform(
 			(TransformInterface) new DiscreteWaveletTransform(new Daub04(),
 					threshold));
@@ -20,19 +20,21 @@ public class DWTTest extends PApplet {
 	boolean[] keys = new boolean[526];
 
 	public void setup() {
+		PImage img = loadImage("data/duc_006_2005_00_1024x768_ducati-monster-620.jpg");
+		// PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
+
 		size(512, 512, JAVA2D);
 		background(0);
 
-		PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
 		img.resize(this.width, this.height);
-
 		// img = getImage(getData(img));
-
 		matHilb = getData(img);
 
 		for (int i = 0; i < depth; i++)
 			matHilb = t.forward(matHilb); // 2-D FWT Haar forward
 		
+		getMinMax(matHilb, 0,0,512,512);
+
 		image(getImage(matHilb), 0, 0);
 	}
 
@@ -44,21 +46,6 @@ public class DWTTest extends PApplet {
 		cumulative = !checkKey(CONTROL);
 
 		switch (key) {
-		case 'a':
-			nullify(data, 256, 0, 256, 512);
-			break;
-		case 's':
-			nullify(data, 0, 256, 512, 256);
-			break;
-		case 'd':
-			nullify(data, 256, 0, 256, 512);
-			nullify(data, 0, 256, 256, 256);
-			break;
-
-		case 'q':
-			nullify(data, 0, 0, 256, 256);
-			break;
-
 		case 'z':
 			inverse = false;
 			break;
@@ -83,7 +70,7 @@ public class DWTTest extends PApplet {
 
 	double[][] getData(PImage img) {
 		int wid = img.width, hei = img.height, i, j;
-		double[][] ret = new double[wid][hei];
+		double[][] ret = new double[hei][wid];
 		double val;
 
 		img.loadPixels();
@@ -172,14 +159,45 @@ public class DWTTest extends PApplet {
 		}
 	}
 
-	private void round(double[][] array){
-		int a = array.length, b = array[0].length, i,j;
-		
+	@SuppressWarnings("unused")
+	private void round(double[][] array) {
+		int a = array.length, b = array[0].length, i, j;
+
 		for (j = 0; j < a; j++)
 			for (i = 0; i < b; i++) {
 				array[i][j] = (int) Math.round(array[i][j]);
 			}
 	}
+
+	private void getMinMax(double[][] array, int x, int y, int wid, int hei) {
+		int i, j, xx = x + wid;
+		double max, min;
+		min = max = array[x][y];
+		
+		for (j = y + hei - 1; j >= y; j--)
+			for (i = x + wid - 1; i >= x; i--) {
+				min = (array[i][j] < min) ? array[i][j] : min;
+				max = (array[i][j] > max) ? array[i][j] : max;
+			}
+		
+		println("(min, max) = ( " + min + ", " + max + " )");
+
+	}
+
+//	private double[] getSD(double[][] array) {
+//		int i, j, xx = x + wid;
+//		double max, min, mean;
+//		min = max = array[x][y];
+//		
+//		for (j = y + hei - 1; j >= y; j--)
+//			for (i = x + wid - 1; i >= x; i--) {
+//				min = (array[i][j] < min) ? array[i][j] : min;
+//				max = (array[i][j] > max) ? array[i][j] : max;
+//			}
+//		
+//		println("(min, max) = ( " + min + ", " + max + " )");
+//		
+//	}
 
 	private double[][] dup(double[][] array) {
 		int a = array.length, b = array[0].length, i;
