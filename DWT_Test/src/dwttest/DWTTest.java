@@ -12,24 +12,25 @@ import processing.core.PImage;
 @SuppressWarnings("serial")
 public class DWTTest extends PApplet {
 
+	WaveletSignatureFactory factory = new WaveletSignatureFactory();
 	WaveletSignature sig;
 	
 	boolean[] keys = new boolean[526];
 
 	public void setup() {
-		PImage img = loadImage("data/Barns_grand_tetons_YCbCr_separation.jpg");
-		// PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
+//		PImage img = loadImage("data/Barns_grand_tetons_YCbCr_separation.jpg");
+		 PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
 
 		size(512, 512, JAVA2D);
 		background(0);
 
-		sig = new WaveletSignature(img, 512, 5);
+		sig = factory.getWaveletSignature(img);
 
 		image(img, 0, 0, 512, 512);
 	}
 
 	public void keyPressed() {
-		image(sig.Image, 0, 0);
+		image(sig.getImage(), 0, 0, this.width, this.height);
 //		double[][] data = dup(matHilb);
 //		boolean inverse = true, cumulative = true;
 //
