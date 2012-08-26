@@ -33,8 +33,6 @@ public class DWTTest extends PApplet {
 		for (int i = 0; i < depth; i++)
 			matHilb = t.forward(matHilb); // 2-D FWT Haar forward
 		
-		round(matHilb);
-
 		image(getImage(matHilb), 0, 0);
 	}
 
