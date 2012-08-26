@@ -35,11 +35,12 @@ public class WaveletSignature {
 			a = new double[tmp.width][tmp.width];
 			b = new double[tmp.width][tmp.width];
 			c = new double[tmp.width][tmp.width];
+
 			getData(tmp, a, b, c);
 
-//			a = factory.t.forward(a);
-//			b = factory.t.forward(b);
-//			c = factory.t.forward(c);
+			a = factory.t.forward(a);
+			b = factory.t.forward(b);
+			c = factory.t.forward(c);
 
 			Y = new double[factory.size][factory.size];
 			U = new double[factory.size][factory.size];
@@ -75,13 +76,13 @@ public class WaveletSignature {
 				g = (b & 0x0000FF00) >> 8;
 				b = b & 0x000000FF;
 
-				y = r / 255.0;
-				u = g / 255.0;
-				v = b / 255.0;
+				y = r;
+				u = g;
+				v = b;
 
 				Y[j][i] = 0.299 * y + 0.587 * u + 0.114 * v;
-				U[j][i] = 0.168736 * y - 0.331264 * u + 0.5 * v;
-				V[j][i] = 0.5 * y - 0.418688 * u - 0.081312 * v;
+				U[j][i] = 128 - 0.168736 * y - 0.331264 * u + 0.5 * v;
+				V[j][i] = 128 + 0.5 * y - 0.418688 * u - 0.081312 * v;
 			}
 
 	}
@@ -93,27 +94,27 @@ public class WaveletSignature {
 		PImage ret = new PImage(factory.size, factory.size, PImage.RGB);
 		// createImage(size, size, PConstants.RGB);
 
-		t1 = Y;
-		t2 = U;
-		t3 = V;
-//		t1 = new double[factory.sampleSize][factory.sampleSize];
-//		t2 = new double[factory.sampleSize][factory.sampleSize];
-//		t3 = new double[factory.sampleSize][factory.sampleSize];
-//		t1 = factory.t.reverse(Y);
-//		t2 = factory.t.reverse(U);
-//		t3 = factory.t.reverse(V);
-		
-//		scale(t1);
-//		scale(t2);
-//		scale(t3);
+//		t1 = Y;
+//		t2 = U;
+//		t3 = V;
+		t1 = new double[factory.size][factory.size];
+		t2 = new double[factory.size][factory.size];
+		t3 = new double[factory.size][factory.size];
+		t1 = factory.t.reverse(Y);
+		t2 = factory.t.reverse(U);
+		t3 = factory.t.reverse(V);
+
+//		 scale(t1);
+//		 scale(t2);
+//		 scale(t3);
 
 		ret.loadPixels();
 
 		for (j = 0; j < factory.size; j++)
 			for (i = 0; i < factory.size; i++) {
-				y = t1[j][i] * 255;
-				u = t2[j][i] * 255 - 128;
-				v = t3[j][i] * 255 - 128;
+				y = t1[j][i];
+				u = t2[j][i] - 128;
+				v = t3[j][i] - 128;
 				r = clamp((int) (y + 1.402 * v));
 				g = clamp((int) (y - 0.34414 * u - 0.71414 * v));
 				b = clamp((int) (y + 1.772 * u));
@@ -125,10 +126,10 @@ public class WaveletSignature {
 		return ret;
 	}
 
-//	private int map(double d, double min, double max, int i, int j) {
-//		return (int) (i + (d - min) * (j - i) / (max - min));
-//	}
-	
+	// private int map(double d, double min, double max, int i, int j) {
+	// return (int) (i + (d - min) * (j - i) / (max - min));
+	// }
+
 	private double map(double d, double min, double max, double i, double j) {
 		return i + (d - min) * (j - i) / (max - min);
 	}
@@ -177,7 +178,6 @@ public class WaveletSignature {
 	}
 
 	private int clamp(int c) {
-		c = Math.abs(c);
 		return (c > 255) ? 255 : (c < 0) ? 0 : c;
 	}
 

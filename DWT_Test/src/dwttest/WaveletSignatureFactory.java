@@ -21,13 +21,13 @@ public class WaveletSignatureFactory {
 	public WaveletSignatureFactory(int sampleSize, int threshold, int level) {
 		this.threshold = threshold;
 		this.sampleSize = sampleSize;
-		this.size = sampleSize;
-//		this.size = (int) (sampleSize / Math.pow(2, threshold));
+//		this.size = sampleSize;
+		this.size = (int) (sampleSize / Math.pow(2, level));
 		this.level = level;
 
 		t = new Transform((TransformInterface) new DiscreteWaveletTransform(
 				new Daub04(), threshold));
-
+		
 		System.out.println(size);
 	}
 
