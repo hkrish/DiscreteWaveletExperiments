@@ -6,7 +6,7 @@ import org.apache.commons.math3.*;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-public class WaveletSignature {
+public class WaveletSignatureI {
 
 	WaveletSignatureFactory factory;
 	// Actually I'm using YCbCr; to be precise, the same conversion found in
@@ -18,7 +18,7 @@ public class WaveletSignature {
 	public double[][] Ys, Us, Vs;
 	public double sigY, sigU, sigV;
 
-	public WaveletSignature(WaveletSignatureFactory factory, PImage src) {
+	public WaveletSignatureI(WaveletSignatureFactory factory, PImage src) {
 		PImage tmp;
 		double[][] a, b, c;
 		int j;
@@ -45,9 +45,9 @@ public class WaveletSignature {
 			// discard higher order coeff. and invert that and then sample the
 			// data to make Y,U,V arrays of factory.size
 
-//			discard(a, factory.level, true);
-//			discard(b, factory.level, true);
-//			discard(c, factory.level, true);
+//			discard(a, 3, true);
+//			discard(b, 3, true);
+//			discard(c, 3, true);
 
 //			a = factory.tf.reverse(a);
 //			b = factory.tf.reverse(b);
@@ -117,36 +117,33 @@ public class WaveletSignature {
 		// t1 = Y;
 		// t2 = U;
 		// t3 = V;
-		t1 = new double[factory.sampleSize][factory.sampleSize];
-		t2 = new double[factory.sampleSize][factory.sampleSize];
-		t3 = new double[factory.sampleSize][factory.sampleSize];
+//		t1 = new double[factory.sampleSize][factory.sampleSize];
+//		t2 = new double[factory.sampleSize][factory.sampleSize];
+//		t3 = new double[factory.sampleSize][factory.sampleSize];
+//
+//		for (j = factory.size - 1; j >= 0; j--) {
+//			System.arraycopy(Y[j], 0, t1[j], 0, factory.size);
+//			System.arraycopy(U[j], 0, t2[j], 0, factory.size);
+//			System.arraycopy(V[j], 0, t3[j], 0, factory.size);
+//		}
 
-		for (j = factory.size - 1; j >= 0; j--) {
-			System.arraycopy(Y[j], 0, t1[j], 0, factory.size);
-			System.arraycopy(U[j], 0, t2[j], 0, factory.size);
-			System.arraycopy(V[j], 0, t3[j], 0, factory.size);
-		}
-
-		t1 = factory.tf.reverse(t1);
-		t2 = factory.tf.reverse(t2);
-		t3 = factory.tf.reverse(t3);
-
-		// scale(t1);
-		// scale(t2);
-		// scale(t3);
+//		t1 = factory.tf.reverse(t1);
+//		t2 = factory.tf.reverse(t2);
+//		t3 = factory.tf.reverse(t3);
 
 		ret.loadPixels();
 
 		for (j = 0; j < factory.size; j++)
 			for (i = 0; i < factory.size; i++) {
-				y = t1[j][i];
-				u = t2[j][i] - 128;
-				v = t3[j][i] - 128;
+				y = Y[j][i];
+				u = U[j][i] - 128;
+				v = V[j][i] - 128;
 				r = clamp((int) (y + 1.402 * v));
 				g = clamp((int) (y - 0.34414 * u - 0.71414 * v));
 				b = clamp((int) (y + 1.772 * u));
 
-				ret.pixels[j * factory.size + i] = (r << 16) | (g << 8) | b;
+				ret.pixels[j * factory.size + i] = (r << 16) | (r << 8) | r;
+//				ret.pixels[j * factory.size + i] = (r << 16) | (g << 8) | b;
 			}
 
 		ret.updatePixels();
@@ -204,10 +201,11 @@ public class WaveletSignature {
 	private void scale(double[][] array) {
 		int a = array.length, b = array[0].length, i, j;
 		double max, min;
-		min = max = array[0][0];
+		min = max = Math.abs(array[0][0]);
 
 		for (j = a - 1; j >= 0; j--)
 			for (i = b - 1; i >= 0; i--) {
+				array[i][j] = Math.abs(array[i][j]);
 				min = (array[i][j] < min) ? array[i][j] : min;
 				max = (array[i][j] > max) ? array[i][j] : max;
 			}

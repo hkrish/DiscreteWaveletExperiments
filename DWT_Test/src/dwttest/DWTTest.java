@@ -13,7 +13,7 @@ import processing.core.PImage;
 public class DWTTest extends PApplet {
 
 	WaveletSignatureFactory factory = new WaveletSignatureFactory();
-	WaveletSignature sig;
+	WaveletSignatureI sig;
 	
 	boolean[] keys = new boolean[526];
 
@@ -27,10 +27,14 @@ public class DWTTest extends PApplet {
 		sig = factory.getWaveletSignature(img);
 
 		image(img, 0, 0, 512, 512);
+		
+		img.resize(256, 256);
+		img.save("/Users/hari/Desktop/1.jpg");
 	}
 
 	public void keyPressed() {
 		image(sig.getImage(), 0, 0, this.width, this.height);
+		sig.getImage().save("/Users/hari/Desktop/2.jpg");
 //		double[][] data = dup(matHilb);
 //		boolean inverse = true, cumulative = true;
 //
