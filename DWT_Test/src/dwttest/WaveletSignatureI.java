@@ -1,6 +1,8 @@
 package dwttest;
 
 import java.util.Arrays;
+
+import processing.core.PApplet;
 import processing.core.PImage;
 import org.apache.commons.math3.*;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -8,15 +10,15 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 public class WaveletSignatureI {
 
-	WaveletSignatureFactory factory;
+	WaveletSignatureFactory	factory;
 	// Actually I'm using YCbCr; to be precise, the same conversion found in
 	// JPEG/JFIF
 	// that is discarding the 'head-room' and 'leg-room' in traditional YCbCr to
 	// use
 	// the full 8bit range (0 - 255)
-	private double[][] Y, U, V;
-	public double[][] Ys, Us, Vs;
-	public double sigY, sigU, sigV;
+	private double[][]		Y, U, V;
+	public int[][]		Ys, Us, Vs;
+	public double			sigY, sigU, sigV;
 
 	public WaveletSignatureI(WaveletSignatureFactory factory, PImage src) {
 		PImage tmp;
@@ -28,8 +30,7 @@ public class WaveletSignatureI {
 		try {
 			tmp = (PImage) src.clone();
 
-			if (tmp.width != factory.sampleSize
-					|| tmp.height != factory.sampleSize)
+			if (tmp.width != factory.sampleSize || tmp.height != factory.sampleSize)
 				tmp.resize(factory.sampleSize, factory.sampleSize);
 
 			a = new double[tmp.width][tmp.width];
@@ -45,24 +46,28 @@ public class WaveletSignatureI {
 			// discard higher order coeff. and invert that and then sample the
 			// data to make Y,U,V arrays of factory.size
 
-//			discard(a, 3, true);
-//			discard(b, 3, true);
-//			discard(c, 3, true);
+			// discard(a, 3, true);
+			// discard(b, 3, true);
+			// discard(c, 3, true);
 
-//			a = factory.tf.reverse(a);
-//			b = factory.tf.reverse(b);
-//			c = factory.tf.reverse(c);
+			// a = factory.tf.reverse(a);
+			// b = factory.tf.reverse(b);
+			// c = factory.tf.reverse(c);
 
 			Y = new double[factory.size][factory.size];
 			U = new double[factory.size][factory.size];
 			V = new double[factory.size][factory.size];
-			
+
 			for (j = factory.size - 1; j >= 0; j--) {
 				System.arraycopy(a[j], 0, Y[j], 0, factory.size);
 				System.arraycopy(b[j], 0, U[j], 0, factory.size);
 				System.arraycopy(c[j], 0, V[j], 0, factory.size);
 			}
 			
+			Ys = round(Y);
+			Us = round(U);
+			Vs = round(V);
+
 			// Now do the SD calculations
 			double[] ysd = arrayUnfold(Y);
 			StandardDeviation SD = new StandardDeviation();
@@ -142,8 +147,7 @@ public class WaveletSignatureI {
 				g = clamp((int) (y - 0.34414 * u - 0.71414 * v));
 				b = clamp((int) (y + 1.772 * u));
 
-				ret.pixels[j * factory.size + i] = (r << 16) | (r << 8) | r;
-//				ret.pixels[j * factory.size + i] = (r << 16) | (g << 8) | b;
+				ret.pixels[j * factory.size + i] = (r << 16) | (g << 8) | b;
 			}
 
 		ret.updatePixels();
@@ -197,7 +201,6 @@ public class WaveletSignatureI {
 		return ret;
 	}
 
-	@SuppressWarnings("unused")
 	private void scale(double[][] array) {
 		int a = array.length, b = array[0].length, i, j;
 		double max, min;
@@ -214,6 +217,17 @@ public class WaveletSignatureI {
 			for (i = 0; i < b; i++) {
 				array[i][j] = map(array[i][j], min, max, 0.0, 1.0);
 			}
+	}
+	
+	private int[][] round(double[][] array) {
+		int a = array.length, i, j;
+		int[][] ret = new int[a][a];
+		
+		for (j = 0; j <a; j++)
+			for (i = 0; i <a; i++)
+				ret[i][j] = (int) Math.round(array[i][j]);
+		
+		return ret;
 	}
 
 	private int clamp(int c) {

@@ -13,20 +13,23 @@ import processing.core.PImage;
 public class DWTTest extends PApplet {
 
 	WaveletSignatureFactory factory = new WaveletSignatureFactory();
-	WaveletSignatureI sig;
+	WaveletSignatureI sig, sig2;
 	
 	boolean[] keys = new boolean[526];
 
 	public void setup() {
-//		PImage img = loadImage("data/Barns_grand_tetons_YCbCr_separation.jpg");
+		PImage img2 = loadImage("data/Barns_grand_tetons_YCbCr_separation.jpg");
 		 PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
 
 		size(512, 512, JAVA2D);
 		background(0);
 
 		sig = factory.getWaveletSignature(img);
+		sig2 = factory.getWaveletSignature(img2);
 
 		image(img, 0, 0, 512, 512);
+		
+		println(factory.euclidianDist(sig, sig2));
 		
 		img.resize(256, 256);
 		img.save("/Users/hari/Desktop/1.jpg");

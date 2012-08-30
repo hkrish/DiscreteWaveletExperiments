@@ -30,6 +30,10 @@ public class WaveletSignatureFactory {
 	public WaveletSignatureI getWaveletSignature(PImage img) {
 		return new WaveletSignatureI(this, img);
 	}
+	
+	public double euclidianDist(WaveletSignatureI a, WaveletSignatureI b){
+		return euclidianDist(a.Ys, b.Ys) + euclidianDist(a.Us, b.Us) + euclidianDist(a.Vs, b.Vs);
+	}
 
 	//
 	private double euclidianDist(int[][] m1, int[][] m2) {
