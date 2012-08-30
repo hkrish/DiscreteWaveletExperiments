@@ -31,21 +31,21 @@ public class WaveletSignatureFactory {
 		return new WaveletSignatureI(this, img);
 	}
 	
-	public double euclidianDist(WaveletSignatureI a, WaveletSignatureI b){
-		return euclidianDist(a.Ys, b.Ys) + euclidianDist(a.Us, b.Us) + euclidianDist(a.Vs, b.Vs);
+	public double euclideanDist(WaveletSignatureI a, WaveletSignatureI b){
+		return euclideanDist(a.Ys, b.Ys) + euclideanDist(a.Us, b.Us) + euclideanDist(a.Vs, b.Vs);
 	}
 
 	//
-	private double euclidianDist(int[][] m1, int[][] m2) {
+	private double euclideanDist(int[][] m1, int[][] m2) {
 		if (m1.length != m1[0].length || m2.length != m2[0].length || m2.length != m1.length) {
 			System.err.println("euclidianDist() - input should be 2 square matrices of equal size");
 			return 0;
 		}
 
-		return euclidianDist(m1, 0, 0, m2, 0, 0, m1.length);
+		return euclideanDist(m1, 0, 0, m2, 0, 0, m1.length);
 	}
 
-	private double euclidianDist(int[][] m1, int x1, int y1, int[][] m2, int x2, int y2, int size) {
+	private double euclideanDist(int[][] m1, int x1, int y1, int[][] m2, int x2, int y2, int size) {
 		double ret = 0.0;
 		int i, j;
 

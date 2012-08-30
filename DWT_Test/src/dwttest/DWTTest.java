@@ -29,7 +29,7 @@ public class DWTTest extends PApplet {
 
 		image(img, 0, 0, 512, 512);
 		
-		println(factory.euclidianDist(sig, sig2));
+		println(factory.euclideanDist(sig, sig2));
 		
 		img.resize(256, 256);
 		img.save("/Users/hari/Desktop/1.jpg");
