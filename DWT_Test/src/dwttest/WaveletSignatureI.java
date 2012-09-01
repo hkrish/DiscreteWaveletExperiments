@@ -1,5 +1,6 @@
 package dwttest;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import processing.core.PApplet;
@@ -8,22 +9,24 @@ import org.apache.commons.math3.*;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-public class WaveletSignatureI {
-
-	WaveletSignatureFactory	factory;
+public class WaveletSignatureI implements Serializable {
+	private static final long	serialVersionUID	= 9123100613546767873L;
+	
+	transient WaveletSignatureFactory	factory;
 	// Actually I'm using YCbCr; to be precise, the same conversion found in
 	// JPEG/JFIF
 	// that is discarding the 'head-room' and 'leg-room' in traditional YCbCr to
 	// use
 	// the full 8bit range (0 - 255)
-	private double[][]		Y, U, V;
+	transient private double[][]		Y, U, V;
 	public int[][]		Ys, Us, Vs;
+	public int[][]		Yss, Uss, Vss;
 	public double			sigY, sigU, sigV;
 
 	public WaveletSignatureI(WaveletSignatureFactory factory, PImage src) {
 		PImage tmp;
-		double[][] a, b, c;
-		int j;
+		double[][] a, b, c , a1, b1,c1;
+		int j, sizes;
 
 		this.factory = factory;
 
@@ -33,15 +36,19 @@ public class WaveletSignatureI {
 			if (tmp.width != factory.sampleSize || tmp.height != factory.sampleSize)
 				tmp.resize(factory.sampleSize, factory.sampleSize);
 
-			a = new double[tmp.width][tmp.width];
-			b = new double[tmp.width][tmp.width];
-			c = new double[tmp.width][tmp.width];
+			a1 = new double[tmp.width][tmp.width];
+			b1 = new double[tmp.width][tmp.width];
+			c1 = new double[tmp.width][tmp.width];
 
-			getData(tmp, a, b, c);
+			getData(tmp, a1, b1, c1);
 
-			a = factory.tf.forward(a);
-			b = factory.tf.forward(b);
-			c = factory.tf.forward(c);
+			a = factory.tf.forward(a1);
+			b = factory.tf.forward(b1);
+			c = factory.tf.forward(c1);
+			
+			a1 = factory.tfs.forward(a1);
+			b1 = factory.tfs.forward(b1);
+			c1 = factory.tfs.forward(c1);
 
 			// discard higher order coeff. and invert that and then sample the
 			// data to make Y,U,V arrays of factory.size
@@ -64,22 +71,40 @@ public class WaveletSignatureI {
 				System.arraycopy(c[j], 0, V[j], 0, factory.size);
 			}
 			
+			// Now do the SD calculations
+			double[] ysd = arrayUnfold(Y);
+			StandardDeviation SD = new StandardDeviation();
+			sigY = SD.evaluate(ysd);
+			ysd = arrayUnfold(U);
+			sigU =SD.evaluate(ysd);
+			ysd = arrayUnfold(V);
+			sigV =SD.evaluate(ysd);
+
 			Ys = round(Y);
 			Us = round(U);
 			Vs = round(V);
 
-			// Now do the SD calculations
-			double[] ysd = arrayUnfold(Y);
-			StandardDeviation SD = new StandardDeviation();
-			System.out.println(SD.evaluate(ysd));
-			ysd = arrayUnfold(U);
-			System.out.println(SD.evaluate(ysd));
-			ysd = arrayUnfold(V);
-			System.out.println(SD.evaluate(ysd));
+			sizes = factory.size / 2;
+			for (j = sizes - 1; j >= 0; j--) {
+				System.arraycopy(a1[j], 0, Y[j], 0, sizes);
+				System.arraycopy(b1[j], 0, U[j], 0, sizes);
+				System.arraycopy(c1[j], 0, V[j], 0, sizes);
+			}
+			
+			Yss = round(Y);
+			Uss = round(U);
+			Vss = round(V);
+
 
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void loadValues(){
+		Y = unRound(Ys);
+		U = unRound(Us);
+		V = unRound(Vs);
 	}
 
 	private void getData(PImage img, double[][] Y, double[][] U, double[][] V) {
@@ -226,6 +251,17 @@ public class WaveletSignatureI {
 		for (j = 0; j <a; j++)
 			for (i = 0; i <a; i++)
 				ret[i][j] = (int) Math.round(array[i][j]);
+		
+		return ret;
+	}
+	
+	private double[][] unRound(int[][] array) {
+		int a = array.length, i, j;
+		double[][] ret = new double[a][a];
+		
+		for (j = 0; j <a; j++)
+			for (i = 0; i <a; i++)
+				ret[i][j] = array[i][j];
 		
 		return ret;
 	}

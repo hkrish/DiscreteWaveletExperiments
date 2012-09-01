@@ -9,7 +9,7 @@ import math.transform.jwave.handlers.wavelets.Daub04;
 public class WaveletSignatureFactory {
 	private static int	DEFAULT_THRESHOLD	= 4, DEFAULT_DETAIL_LEVEL = 3, DEFAULT_SAMPLE_SIZE = 256;
 	int					size, sampleSize, threshold, level;
-	Transform			tf;
+	Transform			tf, tfs;
 
 	public WaveletSignatureFactory() {
 		this(DEFAULT_SAMPLE_SIZE, DEFAULT_THRESHOLD, DEFAULT_DETAIL_LEVEL);
@@ -24,14 +24,15 @@ public class WaveletSignatureFactory {
 		this.level = level;
 
 		tf = new Transform((TransformInterface) new DiscreteWaveletTransform(new Daub04(), threshold));
+		tfs = new Transform((TransformInterface) new DiscreteWaveletTransform(new Daub04(), threshold + 1));
 
 	}
 
 	public WaveletSignatureI getWaveletSignature(PImage img) {
 		return new WaveletSignatureI(this, img);
 	}
-	
-	public double euclideanDist(WaveletSignatureI a, WaveletSignatureI b){
+
+	public double euclideanDist(WaveletSignatureI a, WaveletSignatureI b) {
 		return euclideanDist(a.Ys, b.Ys) + euclideanDist(a.Us, b.Us) + euclideanDist(a.Vs, b.Vs);
 	}
 
