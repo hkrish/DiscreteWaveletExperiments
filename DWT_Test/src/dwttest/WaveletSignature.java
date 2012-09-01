@@ -3,7 +3,7 @@ package dwttest;
 import java.io.Serializable;
 import processing.core.PImage;
 
-public class WaveletSignature implements Serializable {
+public class WaveletSignature implements Serializable, Comparable<WaveletSignature> {
 	private static final long	serialVersionUID	= 6491384560082421303L;
 
 	static final int			SIZE				= 256;
@@ -27,6 +27,9 @@ public class WaveletSignature implements Serializable {
 	public transient double		sigUdivb			= 0.0;
 	public transient double		sigVdivb			= 0.0;
 	public transient double		rank				= -1;
+
+	String						fileName;
+	long						lastModified;
 
 	public WaveletSignature() {
 		// Do nothing
@@ -144,7 +147,7 @@ public class WaveletSignature implements Serializable {
 			for (j = 0; j < w; j++) {
 				mean += y2[i + j];
 			}
-		
+
 		/**
 		 * Is this a <a href=
 		 * "http://en.wikipedia.org/wiki/Standard_deviation#Definition_of_population_values"
@@ -161,5 +164,30 @@ public class WaveletSignature implements Serializable {
 
 		return Math.sqrt(ret / (w * w));
 	}
-	
+
+	@Override
+	public int compareTo(WaveletSignature o) {
+		if (this.rank < o.rank)
+			return -1;
+		else if (this.rank > o.rank)
+			return 1;
+		return 0;
+	}
+
+	public String getFileName() {
+		return this.fileName;
+	}
+
+	public void setFileName(String fname) {
+		this.fileName = fname;
+	}
+
+	public long getLastModified() {
+		return this.lastModified;
+	}
+
+	public void setLastModified(long modified) {
+		this.lastModified = modified;
+	}
+
 }

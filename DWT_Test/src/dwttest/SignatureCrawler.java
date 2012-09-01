@@ -26,7 +26,7 @@ public class SignatureCrawler extends Thread {
 	SignatureFileFilter				fileFilter	= new SignatureFileFilter();
 
 	public final PApplet			parent;
-	RasterImageSignature			sig;
+	WaveletSignature				sig;
 
 	SignatureCrawler(String signatureDestination, String directoryRoot, PApplet p) {
 		File sdir = new File(signatureDestination), dir = new File(directoryRoot);
@@ -77,9 +77,8 @@ public class SignatureCrawler extends Thread {
 		}
 
 		running = true;
-		// Print messages
 		System.out.println("Crawling " + rootDirectory + "\n Signatures will be saved to " + signatureDirectory);
-		// Do whatever start does in Thread, don't forget this!
+
 		super.start();
 	}
 
@@ -107,16 +106,19 @@ public class SignatureCrawler extends Thread {
 			} else {
 				File file = new File(filesCrawled.poll());
 
-				if (RasterImageSignature.accept(file)) {
+				if (RasterImageSignature.accept(file) && shouldCrowl(file)) {
 
 					// Save the signature
-					File sigfile = new File(this.signatureDirectory + File.separator + file.getName() + ".sig");
+					File sigfile = new File(this.signatureDirectory + File.separator + file.hashCode() + ".sig");
+
 					FileOutputStream fos;
 					try {
 						fos = new FileOutputStream(sigfile);
 						ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 						sig = new RasterImageSignature(file.getAbsolutePath(), this.parent);
+						sig.setLastModified(file.lastModified());
+
 						oos.writeObject(sig);
 						sig = null;
 
@@ -140,8 +142,7 @@ public class SignatureCrawler extends Thread {
 		}
 	}
 
-	// Our method that quits the thread
-	void quit() {
+	public void quit() {
 		System.out.println("Stopping.");
 		running = false;
 		interrupt();
@@ -160,6 +161,11 @@ public class SignatureCrawler extends Thread {
 		if (!aDirectory.canRead()) {
 			throw new IllegalArgumentException("Directory cannot be read: " + aDirectory);
 		}
+	}
+
+	private boolean shouldCrowl(File file) {
+		// TODO implement this for continuous crawling.
+		return true;
 	}
 
 	// Create a FileFilter object according to the registered file types

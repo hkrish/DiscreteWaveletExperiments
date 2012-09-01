@@ -1,5 +1,9 @@
 package dwttest;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -14,11 +18,15 @@ public class DWTTest extends PApplet {
 	boolean[]			keys		= new boolean[526];
 
 	SignatureCrawler	crawler;
-	boolean				CrawlerDone	= false;
+	SignatureSearcher	ss;
+
+	ArrayList<String>	knownSignatures;
+	FileFilterSig		ffs			= new FileFilterSig();
 
 	public void setup() {
-		PImage img = loadImage("data/duc_006_2005_00_1024x768_ducati-monster-620.jpg");
-		// PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
+		// PImage img = loadImage(new File("").getAbsolutePath() +
+		// "/src/data/d2005-Ferrari-575-Superamerica-Rear-1920x1440.jpg");
+		PImage img = loadImage("data/2007_MV_Brutale_910_1r.jpg");
 
 		size(512, 512, JAVA2D);
 		background(0);
@@ -31,11 +39,26 @@ public class DWTTest extends PApplet {
 
 		image(getImage(matHilb), 0, 0);
 
-//		crawler = new SignatureCrawler("/Users/hari/Documents/Work/signatures/cars", "/Volumes/HK's passport/My pictures/cars", this);
-//		crawler.RegisterSignatureTypes(RasterImageSignature.FileTypes);
-//		crawler.start();
+		RasterImageSignature query = new RasterImageSignature("data/2005-Ferrari-575-Superamerica-Rear-1920x1440.jpg", this);
+		query.InitSignature(50);
 
-		frameRate(5);
+		knownSignatures = new ArrayList<String>();
+		File sigDir = new File("/Users/hari/Documents/Work/signatures/cars");
+		String[] tmp = sigDir.list(ffs);
+
+		for (String s : tmp)
+			knownSignatures.add(sigDir.getAbsolutePath() + File.separator + s);
+
+		ss = new SignatureSearcher("SigSearcher", query, knownSignatures);
+		ss.start();
+
+//		 crawler = new
+//		 SignatureCrawler("/Users/hari/Documents/Work/signatures/cars",
+//		 "/Volumes/HK's passport/My pictures/cars", this);
+//		 crawler.RegisterSignatureTypes(RasterImageSignature.FileTypes);
+//		 crawler.start();
+//		
+//		 frameRate(5);
 	}
 
 	public void keyPressed() {
@@ -66,13 +89,22 @@ public class DWTTest extends PApplet {
 	}
 
 	public void draw() {
-//		if (crawler.running) {
-//			fill(0);
-//			rect(0, 480, 512, 25);
-//			fill(255);
-//			String msg = "Crawled " + crawler.getDirectoryCount() + " folders and " + crawler.getCount() + "files";
-//			text(msg, 20, 500);
-//		}
+		if (ss.running) {
+			fill(0);
+			rect(0, 480, 512, 25);
+			fill(255);
+			String msg = "Searching... " + ss.getMatchesCount() + " Matches found out of " + knownSignatures.size();
+			text(msg, 20, 500);
+		}
+
+//		 if (crawler.running) {
+//		 fill(0);
+//		 rect(0, 480, 512, 25);
+//		 fill(255);
+//		 String msg = "Crawled " + crawler.getDirectoryCount() +
+//		 " folders and " + crawler.getCount() + "files";
+//		 text(msg, 20, 500);
+//		 }
 
 		// if (!crawler.running) {
 		// println("Crawler Done!");
@@ -176,5 +208,16 @@ public class DWTTest extends PApplet {
 
 	public static void main(String _args[]) {
 		PApplet.main(new String[] { dwttest.DWTTest.class.getName() });
+	}
+
+	// Create a FileFilter object according to the registered file types
+	public class FileFilterSig implements FilenameFilter {
+		@Override
+		public boolean accept(File dir, String name) {
+			if (name.toLowerCase().endsWith(".sig")) {
+				return true;
+			}
+			return false;
+		}
 	}
 }
