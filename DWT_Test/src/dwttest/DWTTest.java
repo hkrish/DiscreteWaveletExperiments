@@ -7,11 +7,14 @@ import processing.core.PImage;
 @SuppressWarnings("serial")
 public class DWTTest extends PApplet {
 
-	static final int	SIZE		= 512;
+	static final int	SIZE		= 256;
 	int					threshold	= 5;
 	DWT_CDF_9_7			t			= new DWT_CDF_9_7(SIZE, SIZE, threshold);
 	int[]				matHilb;
 	boolean[]			keys		= new boolean[526];
+
+	SignatureCrawler	crawler;
+	boolean				CrawlerDone	= false;
 
 	public void setup() {
 		PImage img = loadImage("data/duc_006_2005_00_1024x768_ducati-monster-620.jpg");
@@ -27,6 +30,12 @@ public class DWTTest extends PApplet {
 		matHilb = t.forward(matHilb, 0); // 2-D FWT Haar forward
 
 		image(getImage(matHilb), 0, 0);
+
+//		crawler = new SignatureCrawler("/Users/hari/Documents/Work/signatures/cars", "/Volumes/HK's passport/My pictures/cars", this);
+//		crawler.RegisterSignatureTypes(RasterImageSignature.FileTypes);
+//		crawler.start();
+
+		frameRate(5);
 	}
 
 	public void keyPressed() {
@@ -57,6 +66,35 @@ public class DWTTest extends PApplet {
 	}
 
 	public void draw() {
+//		if (crawler.running) {
+//			fill(0);
+//			rect(0, 480, 512, 25);
+//			fill(255);
+//			String msg = "Crawled " + crawler.getDirectoryCount() + " folders and " + crawler.getCount() + "files";
+//			text(msg, 20, 500);
+//		}
+
+		// if (!crawler.running) {
+		// println("Crawler Done!");
+		//
+		// try {
+		// FileInputStream fis = new
+		// FileInputStream("/Users/hari/git/dwttest/DWT_Test/src/data/2007_MV_Brutale_910_1r.jpg.sig");
+		// ObjectInputStream ois = new ObjectInputStream(fis);
+		// RasterImageSignature ris = (RasterImageSignature) ois.readObject();
+		//
+		// image(getImage(ris.Ys, 16), 0, 0, 512, 512);
+		//
+		// } catch (FileNotFoundException e) {
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// } catch (ClassNotFoundException e) {
+		// e.printStackTrace();
+		// }
+		//
+		// noLoop();
+		// }
 	}
 
 	int[] getData(PImage img) {
@@ -91,6 +129,21 @@ public class DWTTest extends PApplet {
 		return ret;
 	}
 
+	PImage getImage(int[] data, int SIZE) {
+		int i, j;
+		PImage ret = createImage(SIZE, SIZE, RGB);
+
+		ret.loadPixels();
+
+		for (j = 0; j < SIZE; j++)
+			for (i = 0; i < SIZE; i++) {
+				ret.pixels[j * SIZE + i] = color(constrain(Math.abs(data[j * SIZE + i]), 0, 255));
+			}
+
+		ret.updatePixels();
+		return ret;
+	}
+
 	private void discard(int[] data, int level, boolean cumulative) {
 		if (level > threshold || level < 1)
 			return;
@@ -109,7 +162,7 @@ public class DWTTest extends PApplet {
 	private void nullify(int[] data, int x, int y, int wid, int hei) {
 		int j, sp = y * SIZE + x, ep = (y + hei - 1) * SIZE + x;
 
-		for (j = sp; j < ep; j+=SIZE) {
+		for (j = sp; j < ep; j += SIZE) {
 			Arrays.fill(data, j, j + wid, 0);
 		}
 	}
